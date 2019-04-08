@@ -5,3 +5,9 @@ authors = ["Henri Lunnikivi <henri.lunnikivi@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+chrono = "*"
+chrono-tz = "*"
+lazy_static = "*"
+maplit = "*"
+log = "0.4.6"
+env_logger = "0.6.1"
