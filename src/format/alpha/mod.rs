@@ -4,6 +4,7 @@ mod test;
 use chrono::prelude::*;
 use chrono::Duration;
 use chrono_tz::{Europe, Tz};
+use std::collections::HashMap;
 
 const TZ: Tz = Europe::Helsinki;
 
@@ -16,6 +17,10 @@ static ref TIME_FORMATS: Vec<&'static str> = vec![
 static ref IGNORED_WEEKDAY_LABELS: Vec<&'static str> = vec![
     "ma", "ti", "ke", "to", "pe", "la", "su", "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su",
 ];
+
+static ref TAG_BY_KEYCHAR: HashMap<char, Tag> = hashmap! {
+    'p' => Tag::PublishToIcs,
+};
 }
 
 /// Ordered from most specific and well specified to least specific / context dependent.
@@ -28,14 +33,20 @@ enum DateVariant {
     Year(u32),
 }
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+enum Tag {
+    PublishToIcs,
+}
+
 #[derive(Debug, PartialEq)]
-struct Event {
+pub struct Event {
     date: DateVariant,
+    tags: Vec<Tag>,
     description: String,
 }
 
 #[derive(Debug)]
-struct ParseError(String);
+pub struct ParseError(String);
 
 fn parse_date(s: &str, year: i32) -> Option<NaiveDate> {
     trace!("attempting to parse date from: {}", s);
@@ -112,8 +123,35 @@ fn parse_timespan(s: &str, year_of_start: i32) -> Option<(NaiveDate, NaiveDate)>
     }
 }
 
+fn maybe_parse_and_consume_tags(parts: &mut Vec<&str>) -> Vec<Tag> {
+    // pick out the first continuous stream of tokens as the tag list candidate
+    let candidate = parts[0];
+
+    let mut tags: Vec<Tag> = vec![];
+    for c in candidate.chars() {
+        match TAG_BY_KEYCHAR.get(&c) {
+            Some(tag) => tags.push(*tag),
+            None => return vec![],
+        };
+    }
+
+    // success: remove the tag candidate and return tags
+    parts.remove(0);
+    tags
+}
+
+fn maybe_remove_weekday_label(parts: &mut Vec<&str>) {
+    // remove the first part if it's the weekday label
+    if IGNORED_WEEKDAY_LABELS.contains(parts.first().unwrap()) {
+        parts.remove(0);
+
+        trace!("removed weekday-label");
+        trace!("> {:?}", &parts);
+    }
+}
+
 impl Event {
-    fn from_str(s: &str, year: i32) -> Result<Self, ParseError> {
+    pub fn from_str(s: &str, year: i32) -> Result<Self, ParseError> {
         debug!("start parsing Event::from_str(\"{}\", {})", s, year);
 
         // split input string into parts on whitespace
@@ -123,13 +161,8 @@ impl Event {
         }
 
         let date = {
-            // remove the first part if it's the weekday label
-            if IGNORED_WEEKDAY_LABELS.contains(parts.first().unwrap()) {
-                parts.remove(0);
-
-                trace!("removed weekday-label");
-                trace!("> {:?}", &parts);
-            }
+            // if the first element is identified as a weekday label, remove it
+            maybe_remove_weekday_label(&mut parts);
 
             // try parse time from the second element
             let time_result = parse_time(parts[1]);
@@ -196,9 +229,16 @@ impl Event {
             }
         };
 
+        // parse tags if possible
+        let tags = maybe_parse_and_consume_tags(&mut parts);
+
         let description = parts.join(" ");
 
-        let event = Event { date, description };
+        let event = Event {
+            date,
+            tags,
+            description,
+        };
         debug!("parsed: {:?}", event);
         Ok(event)
     }
