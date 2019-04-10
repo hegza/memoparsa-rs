@@ -4,4 +4,5 @@ extern crate lazy_static;
 extern crate maplit;
 #[macro_use]
 extern crate log;
+
 mod format_spec;
