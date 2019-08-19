@@ -37,12 +37,25 @@ lazy_static! {
                 date, tags: vec![], description: "Saskia's Music Festival in late July".to_owned()
             }
         },
+        "   03.09 12:40-13:20 p suuhygienisti Janni Sirola (@Hervanta)"
+        => {
+            let local_start = TZ.ymd(CTX.year, 9, 3).and_hms(12, 40, 0).with_timezone(&Local);
+            let local_end = TZ.ymd(CTX.year, 9, 3).and_hms(13, 20, 0).with_timezone(&Local);
+            let date = DateVariant::TimeSpan(local_start, local_end);
+            Event {
+                date, tags: vec![Tag::PublishToIcs], description: "suuhygienisti Janni Sirola (@Hervanta)".to_owned()
+            }
+        },
     };
+}
+
+fn init() {
+    let _ = env_logger::builder().is_test(true).try_init();
 }
 
 #[test]
 fn example_events_parse_correct() {
-    env_logger::init();
+    init();
 
     for (key, value) in EXAMPLE_EVENTS_BY_LINE.iter() {
         assert_eq!(Event::from_str(key, CTX.year).unwrap(), *value,);

@@ -80,13 +80,34 @@ fn parse_time(s: &str) -> Option<NaiveTime> {
     None
 }
 
-fn parse_timespan(s: &str, year_of_start: i32) -> Option<(NaiveDate, NaiveDate)> {
+fn parse_timespan(s: &str) -> Option<(NaiveTime, NaiveTime)> {
     let timespan_parts = s.split('-').collect::<Vec<&str>>();
     if timespan_parts.len() != 2 {
         return None;
     }
     let left = timespan_parts[0];
     let right = timespan_parts[1];
+
+    let end_time = match parse_time(right) {
+        Some(time) => time,
+        None => return None,
+    };
+
+    let start_time = match parse_time(left) {
+        Some(time) => time,
+        None => return None,
+    };
+
+    Some((start_time, end_time))
+}
+
+fn parse_datespan(s: &str, year_of_start: i32) -> Option<(NaiveDate, NaiveDate)> {
+    let datespan_parts = s.split('-').collect::<Vec<&str>>();
+    if datespan_parts.len() != 2 {
+        return None;
+    }
+    let left = datespan_parts[0];
+    let right = datespan_parts[1];
 
     // end date must exist in full-form in a time span
     let end_date = match parse_date(right, year_of_start) {
@@ -157,7 +178,7 @@ impl Event {
         // split input string into parts on whitespace
         let mut parts = s.split_whitespace().collect::<Vec<&str>>();
         if parts.len() < 2 {
-            return Err(ParseError(format!("could not parse Event from \"{}\", not enough elements to create both date and description", s)));
+            return Err(ParseError(format!("could not parse Event from \"{}\", {} is not enough elements to create both date and description", s, parts.len())));
         }
 
         let date = {
@@ -168,9 +189,9 @@ impl Event {
             let time_result = parse_time(parts[1]);
 
             let mut datevariant = None;
-            // try parse a time-span from the first element
-            if let Some((start_date, end_date)) = parse_timespan(parts.first().unwrap(), year) {
-                trace!("parsed time-span: {:?}", (start_date, end_date));
+            // try parse a date-span from the first element
+            if let Some((start_date, end_date)) = parse_datespan(parts.first().unwrap(), year) {
+                trace!("parsed date-span: {:?}", (start_date, end_date));
 
                 // HACK: 23:59 for end time seems like a sensible default
                 let end_date_time = end_date.and_hms(23, 59, 0);
@@ -204,8 +225,26 @@ impl Event {
                             .with_timezone(&Local),
                     );
                 } else {
-                    dv =
-                        DateVariant::Date(TZ.from_local_date(&date).unwrap().with_timezone(&Local));
+                    // if it's a one day event, try for a time-span on the element[1]
+                    if let Some((start_time, end_time)) = parse_timespan(parts[1]) {
+                        // if a time-span was parsed, consume that
+                        parts.remove(1);
+
+                        let start_date = date.and_hms(start_time.hour(), start_time.minute(), 0);
+                        let end_date = date.and_hms(end_time.hour(), end_time.minute(), 0);
+                        dv = DateVariant::TimeSpan(
+                            TZ.from_local_datetime(&start_date)
+                                .unwrap()
+                                .with_timezone(&Local),
+                            TZ.from_local_datetime(&end_date)
+                                .unwrap()
+                                .with_timezone(&Local),
+                        );
+                    } else {
+                        dv = DateVariant::Date(
+                            TZ.from_local_date(&date).unwrap().with_timezone(&Local),
+                        );
+                    }
                 }
                 datevariant = Some(dv);
             };
