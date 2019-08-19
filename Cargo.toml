@@ -1,15 +1,16 @@
 [package]
-name = "memoparsa"
-version = "0.1.0"
 authors = ["Henri Lunnikivi <henri.lunnikivi@gmail.com>"]
 edition = "2018"
-
+name = "memoparsa"
+version = "0.1.0"
 [dependencies]
 chrono = "*"
 chrono-tz = "*"
+env_logger = "0.6.1"
+ics = "*"
 lazy_static = "*"
 log = "0.4.6"
-env_logger = "0.6.1"
 maplit = "*"
+uuid = { version = "*", features = ["v4"] }
 
 [dev-dependencies]

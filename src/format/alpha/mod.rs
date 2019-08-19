@@ -4,7 +4,10 @@ mod test;
 use chrono::prelude::*;
 use chrono::Duration;
 use chrono_tz::{Europe, Tz};
+use ics::properties::{Comment, DtEnd, DtStart, Summary};
+use ics::Event as IcsEvent;
 use std::collections::HashMap;
+use uuid::Uuid;
 
 const TZ: Tz = Europe::Helsinki;
 
@@ -26,7 +29,7 @@ static ref TAG_BY_KEYCHAR: HashMap<char, Tag> = hashmap! {
 
 /// Ordered from most specific and well specified to least specific / context dependent.
 #[derive(Debug, PartialEq)]
-enum DateVariant {
+pub enum DateVariant {
     TimeSpan(DateTime<Local>, DateTime<Local>),
     DateTime(DateTime<Local>),
     Date(Date<Local>),
@@ -35,16 +38,16 @@ enum DateVariant {
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
-enum Tag {
+pub enum Tag {
     PublishToIcs,
     Acknowledge,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Event {
-    date: DateVariant,
-    tags: Vec<Tag>,
-    description: String,
+    pub date: DateVariant,
+    pub tags: Vec<Tag>,
+    pub description: String,
 }
 
 #[derive(Debug)]
@@ -173,6 +176,9 @@ fn maybe_remove_weekday_label(parts: &mut Vec<&str>) {
     }
 }
 
+const DATETIME_FORMAT: &str = "%Y%m%dT%H%M%SZ";
+const DATE_FORMAT: &str = "%Y%m%d";
+
 impl Event {
     pub fn from_str(s: &str, year: i32) -> Result<Self, ParseError> {
         debug!("start parsing Event::from_str(\"{}\", {})", s, year);
@@ -281,6 +287,35 @@ impl Event {
             description,
         };
         debug!("parsed: {:?}", event);
+        Ok(event)
+    }
+    pub fn create_ics_event(&self) -> Result<IcsEvent, ()> {
+        let mut event = IcsEvent::new(
+            Uuid::new_v4().to_string(),
+            Utc::now().format(DATETIME_FORMAT).to_string(),
+        );
+        match self.date {
+            DateVariant::TimeSpan(start, end) => {
+                event.push(DtStart::new(start.format(DATETIME_FORMAT).to_string()));
+                event.push(DtEnd::new(end.format(DATETIME_FORMAT).to_string()));
+            }
+            DateVariant::DateTime(date) => {
+                event.push(DtStart::new(date.format(DATETIME_FORMAT).to_string()));
+            }
+            DateVariant::Date(date) => {
+                let date_fmt = date.format(DATE_FORMAT);
+                let date_str = date_fmt.to_string();
+                event.push(DtStart::new(date_str));
+            }
+            DateVariant::Month { year, month } => {
+                unimplemented!("converting 'year/month' events into .ics is not implemented");
+            }
+            DateVariant::Year(_) => {
+                unimplemented!("converting 'year' events into .ics is not implemented");
+            }
+        }
+        event.push(Summary::new(&self.description));
+        event.push(Comment::new("created with memoparsa"));
         Ok(event)
     }
 }
