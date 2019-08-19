@@ -20,6 +20,7 @@ static ref IGNORED_WEEKDAY_LABELS: Vec<&'static str> = vec![
 
 static ref TAG_BY_KEYCHAR: HashMap<char, Tag> = hashmap! {
     'p' => Tag::PublishToIcs,
+    '#' => Tag::Acknowledge,
 };
 }
 
@@ -36,6 +37,7 @@ enum DateVariant {
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum Tag {
     PublishToIcs,
+    Acknowledge,
 }
 
 #[derive(Debug, PartialEq)]

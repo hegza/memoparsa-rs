@@ -20,6 +20,15 @@ lazy_static! {
                 date, tags: vec![Tag::PublishToIcs], description: "diplomityö Janille viimeistä kommentointia varten".to_owned()
             }
         },
+        "22.-27.10  # Rankka"
+        => {
+            let local_start = TZ.ymd(CTX.year, 10, 22).and_hms(6, 0, 0).with_timezone(&Local);
+            let local_end = TZ.ymd(CTX.year, 10, 27).and_hms(23, 59, 0).with_timezone(&Local);
+            let date = DateVariant::TimeSpan(local_start, local_end);
+            Event {
+                date, tags: vec![Tag::Acknowledge], description: "Rankka".to_owned()
+            }
+        },
         "ma  25.04    23:59      [](PRML kirjan laina-aika päättyy)"
         => {
             let local = TZ.ymd(CTX.year, 4, 25).and_hms(23, 59, 0).with_timezone(&Local);
