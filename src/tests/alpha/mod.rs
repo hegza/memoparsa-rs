@@ -1,8 +1,6 @@
-use crate::format::alpha::{Tag, Event, DateVariant};
-use ics::properties::{Comment, DtStart, DtEnd, Summary};
-use ics::{ICalendar, ToDo, Event as IcsEvent};
-use uuid::Uuid;
-use chrono::prelude::*;
+use crate::format::alpha::{Tag, Event};
+use crate::format::CreateIcsEvent;
+use ics::ICalendar;
 
 #[test]
 fn alpha_parses_correct() {
@@ -19,9 +17,6 @@ fn alpha_parses_correct() {
     }
 }
 
-const DATETIME_FORMAT: &str = "%Y%m%dT%H%M%SZ";
-const DATE_FORMAT: &str = "%Y%m%d";
-
 #[test]
 fn alpha_converts_to_ics() {
     let file_contents = include_str!("alpha.md");
@@ -36,7 +31,7 @@ fn alpha_converts_to_ics() {
     let mut calendar = ICalendar::new("2.0", "alpha");
 
     for entry in &ics_entries {
-        let event = entry.create_ics_event().unwrap();
+        let event = entry.create_ics_event();
         calendar.add_event(event);
     }
 
