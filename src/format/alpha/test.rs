@@ -1,7 +1,7 @@
-use chrono_tz::{Europe, Tz};
-use std::collections::HashMap;
 use super::{DateVariant, Event, Tag};
 use chrono::prelude::*;
+use chrono_tz::{Europe, Tz};
+use std::collections::HashMap;
 
 const TZ: Tz = Europe::Helsinki;
 

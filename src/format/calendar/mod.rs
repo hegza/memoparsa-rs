@@ -23,7 +23,7 @@ lazy_static! {
 
 enum Context {
     Year(i32),
-    Date(NaiveDate)
+    Date(NaiveDate),
 }
 
 pub fn parse_calendar(source: &str, date_ctx: NaiveDate) -> Vec<Event> {
@@ -42,7 +42,7 @@ pub fn parse_calendar(source: &str, date_ctx: NaiveDate) -> Vec<Event> {
                     ctx = Context::Year(date.year());
                     continue;
                 }
-                Context::Year(year) => {},
+                Context::Year(year) => {}
             }
         }
 
@@ -93,8 +93,7 @@ pub fn parse_calendar(source: &str, date_ctx: NaiveDate) -> Vec<Event> {
                     let timing_candidate = tokens.remove(0);
                     // try parse the first token into a time span
                     if let Some((start_time, end_time)) = parse_timespan(timing_candidate) {
-                        let start_date =
-                            date.and_hms(start_time.hour(), start_time.minute(), 0);
+                        let start_date = date.and_hms(start_time.hour(), start_time.minute(), 0);
                         let end_date = date.and_hms(end_time.hour(), end_time.minute(), 0);
                         let dv = DateVariant::TimeSpan(
                             TZ.from_local_datetime(&start_date)

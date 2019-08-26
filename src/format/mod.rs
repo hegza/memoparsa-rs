@@ -2,8 +2,8 @@ pub mod alpha;
 pub mod calendar;
 
 use chrono::prelude::*;
-use ics::properties::{Comment, DtEnd, DtStart, Summary};
 use chrono_tz::{Europe, Tz};
+use ics::properties::{Comment, DtEnd, DtStart, Summary};
 use uuid::Uuid;
 
 const TZ: Tz = Europe::Helsinki;

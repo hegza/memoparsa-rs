@@ -7,14 +7,12 @@ use chrono::Duration;
 use std::collections::HashMap;
 
 lazy_static! {
-static ref IGNORED_WEEKDAY_LABELS: Vec<&'static str> = vec![
-    "ma", "ti", "ke", "to", "pe", "la", "su", "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su",
-];
-
-static ref TAG_BY_KEYCHAR: HashMap<char, Tag> = hashmap! {
-    'p' => Tag::PublishToIcs,
-    '#' => Tag::Acknowledge,
-};
+    static ref IGNORED_WEEKDAY_LABELS: Vec<&'static str> =
+        vec!["ma", "ti", "ke", "to", "pe", "la", "su", "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su",];
+    static ref TAG_BY_KEYCHAR: HashMap<char, Tag> = hashmap! {
+        'p' => Tag::PublishToIcs,
+        '#' => Tag::Acknowledge,
+    };
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]

@@ -1,4 +1,4 @@
-use crate::format::alpha::{Tag, Event};
+use crate::format::alpha::{Event, Tag};
 use crate::format::CreateIcsEvent;
 use ics::ICalendar;
 
@@ -29,8 +29,10 @@ fn alpha_converts_to_ics() {
     let lines = file_contents.split('\n');
 
     // process lines into DOM
-    let ics_entries = lines.filter_map(|line| Event::from_str(line, 2019).ok())
-            .filter(|entry| entry.tags.contains(&Tag::PublishToIcs)).collect::<Vec<Event>>();
+    let ics_entries = lines
+        .filter_map(|line| Event::from_str(line, 2019).ok())
+        .filter(|entry| entry.tags.contains(&Tag::PublishToIcs))
+        .collect::<Vec<Event>>();
 
     let mut calendar = ICalendar::new("2.0", "alpha");
 
