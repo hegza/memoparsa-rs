@@ -4,6 +4,8 @@ use ics::ICalendar;
 
 #[test]
 fn alpha_parses_correct() {
+    let _ = env_logger::builder().is_test(true).try_init();
+
     let file_contents = include_str!("alpha.md");
 
     // split into a queue of lines
@@ -19,6 +21,8 @@ fn alpha_parses_correct() {
 
 #[test]
 fn alpha_converts_to_ics() {
+    let _ = env_logger::builder().is_test(true).try_init();
+
     let file_contents = include_str!("alpha.md");
 
     // split into a queue of lines

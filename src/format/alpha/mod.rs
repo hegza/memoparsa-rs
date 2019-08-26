@@ -1,20 +1,12 @@
 #[cfg(test)]
 mod test;
 
-use super::DateVariant;
+use super::*;
 use chrono::prelude::*;
 use chrono::Duration;
-use chrono_tz::{Europe, Tz};
 use std::collections::HashMap;
 
-const TZ: Tz = Europe::Helsinki;
-
 lazy_static! {
-static ref TIME_FORMATS: Vec<&'static str> = vec![
-    "%k:%M", // 23:59
-    "%k%M",  // 2359
-];
-
 static ref IGNORED_WEEKDAY_LABELS: Vec<&'static str> = vec![
     "ma", "ti", "ke", "to", "pe", "la", "su", "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su",
 ];
@@ -40,59 +32,6 @@ pub struct Event {
 
 #[derive(Debug)]
 pub struct ParseError(String);
-
-fn parse_date(s: &str, year: i32) -> Option<NaiveDate> {
-    trace!("attempting to parse date from: {}", s);
-
-    let parts = s.split('.').collect::<Vec<&str>>();
-    // cannot contain both a day and a month
-    if parts.len() < 2 {
-        return None;
-    }
-
-    let day = match parts[0].parse::<u32>() {
-        Ok(u) => u,
-        Err(_) => return None,
-    };
-    let month = match parts[1].parse::<u32>() {
-        Ok(u) => u,
-        Err(_) => return None,
-    };
-
-    let date = NaiveDate::from_ymd(year, month, day);
-    trace!("parsed: {:?}", date);
-    Some(date)
-}
-
-fn parse_time(s: &str) -> Option<NaiveTime> {
-    for fmt in TIME_FORMATS.iter() {
-        if let Ok(t) = NaiveTime::parse_from_str(s, fmt) {
-            return Some(t);
-        }
-    }
-    None
-}
-
-fn parse_timespan(s: &str) -> Option<(NaiveTime, NaiveTime)> {
-    let timespan_parts = s.split('-').collect::<Vec<&str>>();
-    if timespan_parts.len() != 2 {
-        return None;
-    }
-    let left = timespan_parts[0];
-    let right = timespan_parts[1];
-
-    let end_time = match parse_time(right) {
-        Some(time) => time,
-        None => return None,
-    };
-
-    let start_time = match parse_time(left) {
-        Some(time) => time,
-        None => return None,
-    };
-
-    Some((start_time, end_time))
-}
 
 fn parse_datespan(s: &str, year_of_start: i32) -> Option<(NaiveDate, NaiveDate)> {
     let datespan_parts = s.split('-').collect::<Vec<&str>>();
