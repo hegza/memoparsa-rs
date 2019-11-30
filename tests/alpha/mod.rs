@@ -1,12 +1,11 @@
-use crate::format::alpha::{Event, Tag};
-use crate::format::CreateIcsEvent;
 use ics::ICalendar;
+use memoparsa::{CreateIcsEvent, Event, Tag};
 
 #[test]
 fn alpha_parses_correct() {
     let _ = env_logger::builder().is_test(true).try_init();
 
-    let file_contents = include_str!("../../../data/alpha.md");
+    let file_contents = include_str!("../../data/alpha.md");
 
     // split into a queue of lines
     let lines = file_contents.split('\n');
@@ -23,7 +22,7 @@ fn alpha_parses_correct() {
 fn alpha_converts_to_ics() {
     let _ = env_logger::builder().is_test(true).try_init();
 
-    let file_contents = include_str!("../../../data/alpha.md");
+    let file_contents = include_str!("../../data/alpha.md");
 
     // split into a queue of lines
     let lines = file_contents.split('\n');

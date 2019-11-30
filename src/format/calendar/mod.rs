@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use super::*;
 use chrono::prelude::*;
 use std::collections::HashMap;

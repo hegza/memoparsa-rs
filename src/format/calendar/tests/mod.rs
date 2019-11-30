@@ -1,4 +1,4 @@
-use crate::format::calendar::parse_calendar;
+use super::parse_calendar;
 use chrono::prelude::*;
 
 #[test]

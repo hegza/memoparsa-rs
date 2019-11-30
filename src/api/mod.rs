@@ -1,5 +1,9 @@
-use crate::format::alpha::{Event, Tag};
-use crate::format::CreateIcsEvent;
+// Event, Tag, and CreateIcsEvent are part of the API
+pub use crate::format::{
+    alpha::{Event, Tag},
+    CreateIcsEvent,
+};
+
 use ics::ICalendar;
 use std::path::Path;
 
