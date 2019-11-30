@@ -4,6 +4,10 @@ authors = ["Henri Lunnikivi <henri.lunnikivi@gmail.com>",
 edition = "2018"
 name = "memoparsa"
 version = "0.1.0"
+description = """
+This crate converts our custom note formats into standardized .ics for eg.
+GoogleCalendar."""
+
 [dependencies]
 clap = "2.33.0"
 chrono = "*"
