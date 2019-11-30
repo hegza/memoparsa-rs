@@ -23,11 +23,11 @@ pub trait Event {
 }
 
 pub trait CreateIcsEvent {
-    fn create_ics_event(&self) -> ics::Event;
+    fn create_ics_event<'a>(&'a self) -> ics::Event<'a>;
 }
 
 /// Ordered from most specific and well specified to least specific / context dependent.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum DateVariant {
     TimeSpan(DateTime<Local>, DateTime<Local>),
     DateTime(DateTime<Local>),

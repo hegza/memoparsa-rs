@@ -21,7 +21,7 @@ pub enum Tag {
     Acknowledge,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Event {
     pub date: DateVariant,
     pub tags: Vec<Tag>,
