@@ -1,12 +1,18 @@
 #[macro_use]
 extern crate clap;
 extern crate exitcode;
+#[macro_use]
+extern crate log;
 use chrono::prelude::*;
 use clap::{App, Arg};
 
 static OUTPUT: &str = "parsa.ics";
 
 fn main() {
+    // enable full logging with RUST_LOG=memoparsa=trace
+    env_logger::init();
+
+    // handle command line arguments
     let matches = cli();
 
     let source_contents = std::fs::read_to_string(matches.value_of("input").unwrap()).unwrap();
