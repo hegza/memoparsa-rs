@@ -89,7 +89,10 @@ pub fn parse_date(s: &str, year: i32) -> Option<NaiveDate> {
         Err(_) => return None,
     };
 
-    let date = NaiveDate::from_ymd(year, month, day);
+    let date = match NaiveDate::from_ymd_opt(year, month, day) {
+        Some(date) => date,
+        None => panic!("invalid date: {}-{}-{}", year, month, day),
+    };
     trace!("parsed: {:?}", date);
     Some(date)
 }
