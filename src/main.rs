@@ -1,10 +1,9 @@
 #[macro_use]
 extern crate clap;
 extern crate exitcode;
-use clap::{App, Arg, SubCommand};
-use std::process;
+use clap::{App, Arg};
 
-static OUTPUT: &str = "parsa.txt";
+static OUTPUT: &str = "parsa.ics";
 
 fn main() {
     let matches = App::new("memoparsa")
@@ -14,6 +13,10 @@ fn main() {
         .args_from_usage(
             "-o, --output=[FILE] 'Sets custom output file'
             <INPUT>              'Sets input file to use'",
+        )
+        .arg(
+            Arg::from_usage("<FORMAT>             'Sets input format'")
+                .validator(validate_input_format_spec),
         )
         .get_matches();
     println!("Tester program for cli implementation");
@@ -29,5 +32,24 @@ fn main() {
         println! {"Fatal error: no input file specified"};
         std::process::exit(exitcode::DATAERR);
     }
+    if let Some(in_format) = matches.value_of("FORMAT") {
+        println!("Selected input format: {}", in_format);
+    } else {
+        println! {"Fatal error: no input format specified"};
+        std::process::exit(exitcode::DATAERR);
+    }
     std::process::exit(exitcode::OK);
+}
+
+/** Checks that the input format specifier is one of the allowed formats, eg.
+ *  alpha. */
+fn validate_input_format_spec(s: String) -> Result<(), String> {
+    match s.as_ref() {
+        "alpha" | "ALPHA" => Ok(()),
+        _ => {
+            let mut msg = "unknown format: ".to_string();
+            msg.push_str(&s);
+            Err(msg)
+        }
+    }
 }
