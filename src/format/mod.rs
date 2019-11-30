@@ -40,7 +40,7 @@ impl<T> CreateIcsEvent for T
 where
     T: Event,
 {
-    fn create_ics_event(&self) -> ics::Event {
+    fn create_ics_event<'a>(&'a self) -> ics::Event<'a> {
         let mut event = ics::Event::new(
             Uuid::new_v4().to_string(),
             Utc::now().format(DATETIME_FORMAT).to_string(),
@@ -58,7 +58,7 @@ where
                 let date_str = date_fmt.to_string();
                 event.push(DtStart::new(date_str));
             }
-            DateVariant::Month { year, month } => {
+            DateVariant::Month { .. } => {
                 unimplemented!("converting 'year/month' events into .ics is not implemented");
             }
             DateVariant::Year(_) => {
