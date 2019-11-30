@@ -15,4 +15,5 @@ log = "0.4.6"
 maplit = "*"
 uuid = { version = "*", features = ["v4"] }
 
+# Dev dependencies for examples for instance
 [dev-dependencies]
