@@ -22,7 +22,7 @@ where
     }
 }
 
-fn save_alpha_as_ics<P>(year: i32, source: &str, destination: P)
+fn save_alpha_as_ics<P>(start_year: i32, source: &str, destination: P)
 where
     P: AsRef<Path>,
 {
@@ -30,10 +30,23 @@ where
     let lines = source.split('\n');
 
     // process lines into DOM
-    let events = lines
-        .filter_map(|line| Event::from_str(line, year).ok())
-        .filter(|entry| entry.tags.contains(&Tag::PublishToIcs))
-        .collect::<Vec<Event>>();
+    let mut events = Vec::new();
+    let mut cur_year = start_year;
+    for line in lines {
+        let event = Event::from_str(line, cur_year);
+        if event.is_ok() {
+            let event = event.unwrap();
+            if event.tags.contains(&Tag::PublishToIcs) {
+                info!("publishing event {:?} to ics", event);
+                events.push(event);
+            }
+        } else if let Ok(year) = line.parse::<i32>() {
+            debug!("context changes year: {}", year);
+            cur_year = year;
+        } else {
+            debug!("ignored line {}", line);
+        }
+    }
 
     let mut calendar = ICalendar::new("2.0", "alpha");
 
