@@ -1,8 +1,5 @@
 #[macro_use]
 extern crate clap;
-extern crate exitcode;
-#[macro_use]
-extern crate log;
 use chrono::prelude::*;
 use clap::{App, Arg};
 
