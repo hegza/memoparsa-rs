@@ -3,8 +3,6 @@ extern crate clap;
 use chrono::prelude::*;
 use clap::{App, Arg};
 
-static OUTPUT: &str = "parsa.ics";
-
 fn main() {
     // enable full logging with RUST_LOG=memoparsa=trace
     env_logger::init();
@@ -17,16 +15,18 @@ fn main() {
         "alpha" | "ALPHA" => memoparsa::SourceFormat::Alpha,
         _ => panic!("unknown format"),
     };
-    let year = matches.value_of("start-year");
-    let output_file = matches.value_of("output").unwrap();
+    let year = matches
+        .value_of("start-year")
+        .unwrap()
+        .parse::<i32>()
+        .unwrap();
+    let output_file = matches.value_of("output");
 
     // do work
-    memoparsa::save_as_ics(
-        format,
-        year.unwrap().parse::<i32>().unwrap(),
-        &source_contents,
-        output_file,
-    );
+    match output_file {
+        Some(output_file) => memoparsa::save_as_ics(format, year, &source_contents, output_file),
+        None => memoparsa::parse(format, year, &source_contents),
+    }
 
     std::process::exit(exitcode::OK);
 }
@@ -36,7 +36,7 @@ fn cli<'a>() -> clap::ArgMatches<'a> {
         .version(crate_version!())
         .author(crate_authors!("\n"))
         .about(crate_description!())
-        .arg(Arg::from_usage("-o, --output=[FILE] 'Sets custom output file'").default_value(OUTPUT))
+        .arg(Arg::from_usage("-o, --output=[FILE] 'Sets custom output file'"))
         .args_from_usage(
             "<input>              'Sets input file to use'",
         )
@@ -70,12 +70,6 @@ fn cli<'a>() -> clap::ArgMatches<'a> {
     } else {
         println! {"Fatal error: no input format specified"};
         std::process::exit(exitcode::DATAERR);
-    }
-    if let Some(output) = matches.value_of("output") {
-        println!("Selected output file: {}", output);
-    } else {
-        let output = OUTPUT;
-        println!("Using default output file: {}", output);
     }
     matches
 }
