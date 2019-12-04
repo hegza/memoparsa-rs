@@ -22,10 +22,41 @@ where
     }
 }
 
+pub fn parse(format: SourceFormat, year: i32, source: &str) {
+    match format {
+        SourceFormat::Alpha => {
+            parse_alpha(year, source);
+        }
+    }
+}
+
 fn save_alpha_as_ics<P>(start_year: i32, source: &str, destination: P)
 where
     P: AsRef<Path>,
 {
+    let events = parse_alpha(start_year, source);
+
+    let mut calendar = ICalendar::new("2.0", "alpha");
+
+    // Add Helsinki timezone
+    let tz = TimeZone::new(
+        "Europe/Helsinki",
+        // NOTE: if the law for daylight saving time changes in Finland, use ZoneTime::standard
+        ZoneTime::daylight("19671025T040000", "+0200", "+0300"),
+    );
+    calendar.add_timezone(tz);
+
+    for entry in &events {
+        let event = entry.create_ics_event();
+        calendar.add_event(event);
+    }
+
+    calendar
+        .save_file(destination.as_ref().to_str().unwrap())
+        .unwrap();
+}
+
+fn parse_alpha(start_year: i32, source: &str) -> Vec<Event> {
     // split into a queue of lines
     let lines = source.split('\n');
 
@@ -48,22 +79,5 @@ where
         }
     }
 
-    let mut calendar = ICalendar::new("2.0", "alpha");
-
-    // Add Helsinki timezone
-    let tz = TimeZone::new(
-        "Europe/Helsinki",
-        // NOTE: if the law for daylight saving time changes in Finland, use ZoneTime::standard
-        ZoneTime::daylight("19671025T040000", "+0200", "+0300"),
-    );
-    calendar.add_timezone(tz);
-
-    for entry in &events {
-        let event = entry.create_ics_event();
-        calendar.add_event(event);
-    }
-
-    calendar
-        .save_file(destination.as_ref().to_str().unwrap())
-        .unwrap();
+    events
 }
