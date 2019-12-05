@@ -7,7 +7,8 @@ use ics::properties::{Comment, DtEnd, DtStart, Summary};
 use uuid::Uuid;
 
 const TZ: Tz = Europe::Helsinki;
-const DATETIME_FORMAT: &str = "%Y%m%dT%H%M%SZ";
+// HACK: use the timezone directly in the format
+const DATETIME_FORMAT: &str = "%Y%m%dT%H%M%S+02:00";
 const DATE_FORMAT: &str = "%Y%m%d";
 
 lazy_static! {
